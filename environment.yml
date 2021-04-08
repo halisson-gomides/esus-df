@@ -1,0 +1,40 @@
+name: dash-e-sus
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ca-certificates=2020.12.5=h5b45459_0
+  - certifi=2020.12.5=py38haa244fe_1
+  - openssl=1.1.1k=h8ffe710_0
+  - pip=21.0.1=pyhd8ed1ab_0
+  - python=3.8.8=h7840368_0_cpython
+  - python_abi=3.8=1_cp38
+  - sqlite=3.35.4=h8ffe710_0
+  - vc=14.2=hb210afc_4
+  - vs2015_runtime=14.28.29325=h5e1d092_4
+  - wheel=0.36.2=pyhd3deb0d_0
+  - wincertstore=0.2=py38haa244fe_1006
+  - pip:
+    - brotli==1.0.9
+    - click==7.1.2
+    - dash==1.19.0
+    - dash-core-components==1.15.0
+    - dash-html-components==1.1.2
+    - dash-renderer==1.9.0
+    - dash-table==4.11.2
+    - et-xmlfile==1.0.1
+    - flask==1.1.2
+    - flask-compress==1.9.0
+    - future==0.18.2
+    - itsdangerous==1.1.0
+    - jinja2==2.11.3
+    - markupsafe==1.1.1
+    - numpy==1.20.2
+    - openpyxl==3.0.7
+    - python-dateutil==2.8.1
+    - pytz==2021.1
+    - setuptools==54.2.0
+    - six==1.15.0
+    - werkzeug==1.0.1
+    - xlrd==2.0.1
+prefix: C:\Users\halissonsg\Anaconda3\envs\dash-e-sus

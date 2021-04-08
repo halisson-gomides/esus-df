@@ -1,0 +1,8 @@
+# ignorar todos os arquivos nos diretórios especificados abaixo
+.ipynb_checkpoints/
+.idea/
+__pycache__/
+
+# ignorar arquivos
+dados/originais/tbEstabelecimento202102.csv
+
