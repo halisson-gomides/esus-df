@@ -11,15 +11,13 @@ lst_columns = ['dataNotificacao', 'ocupacaoSuspeitoCli', 'saidaConfirmadaObitos'
 df = pd.read_csv('dados/processados/e-sus-ocupacao-estabelecimento.csv', parse_dates=['dataNotificacao'], usecols=lst_columns)
 
 # Agregações para mostrar na tabela
-df_tabela = df[lst_columns].groupby([
+df_tabela = df.groupby([
     df['dataNotificacao'].dt.to_period('M'),
     'NO_FANTASIA',
     'NU_LATITUDE',
     'NU_LONGITUDE'
-]).agg({
-    'ocupacaoSuspeitoCli': 'mean',
-    'saidaConfirmadaObitos': 'sum'
-}).reset_index()
+]).agg({'ocupacaoSuspeitoCli': 'mean', 'saidaConfirmadaObitos': 'sum'}).reset_index()
+
 
 # Agregações para mostrar no mapa
 df_mapa = df_tabela.groupby(['NO_FANTASIA', 'NU_LATITUDE', 'NU_LONGITUDE']).agg({
@@ -32,20 +30,29 @@ periodos_range = {i: {'label': label.strftime('%m-%Y'), 'style': {'transform': '
 
 
 def generate_table(dataframe, max_rows=50, idT='id_padrao'):
+    data = dataframe.copy()
+    data.columns = ['Notificação', 'Hospital', 'Ocupação média', 'Total Óbitos']
+    data['Ocupação média'] = data['Ocupação média'].round(2)
+    data = data.sort_values(by=['Notificação', 'Hospital'])
+    for col in data.columns:
+        if data[col].dtype not in ['object', 'int64', 'float64']:
+            data[col] = data[col].dt.strftime('%m-%Y')
+
     return html.Table(id=idT, children=[
         html.Thead(
-            html.Tr([html.Th(col) for col in dataframe.columns])
+            html.Tr([html.Th(col) for col in data.columns])
         ),
         html.Tbody([
             html.Tr([
-                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-            ]) for i in range(min(len(dataframe), max_rows))
+                html.Td(data.iloc[i][col]) for col in data.columns
+            ]) for i in range(min(len(data), max_rows))
         ])
     ])
 
+
 def generate_map(dataframe, colunas=''):
     colunas = dataframe.columns if colunas == '' else colunas
-    mapa = px.scatter_mapbox(dataframe, lat='NU_LATITUDE', lon='NU_LONGITUDE',
+    mapa = px.scatter_mapbox(dataframe[colunas], lat='NU_LATITUDE', lon='NU_LONGITUDE',
                              hover_name='NO_FANTASIA',
                              hover_data=['ocupacaoSuspeitoCli', 'saidaConfirmadaObitos'],
                              color_continuous_scale="viridis",
@@ -60,7 +67,7 @@ def generate_map(dataframe, colunas=''):
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, title='e-SUS - DF')
 
 app.layout = html.Div(children=[
     html.H1(children='Ocupação dos Leitos SUS na linha do tempo'),
@@ -93,7 +100,7 @@ app.layout = html.Div(children=[
     ),
 
     html.H4(children='Amostra dos Dados'),
-    generate_table(df_tabela, idT='tb_amostra')
+    generate_table(df_tabela[['dataNotificacao', 'NO_FANTASIA', 'ocupacaoSuspeitoCli', 'saidaConfirmadaObitos']], idT='tb_amostra')
 ])
 
 
@@ -109,11 +116,15 @@ def filtro_date(date_range):
     idx_max = max(date_range)
     date_min = periodos_range[idx_min]["label"]
     date_max = periodos_range[idx_max]["label"]
-    print(f'date_range: {date_range}')
-    print(f'idx_min: {idx_min} | periodo: {date_min}')
-    print(f'idx_max: {idx_max} | periodo: {date_max}')
-    df_filtrado = df.loc[(df['dataNotificacao'].dt.to_period('M') >= date_min) & (df['dataNotificacao'].dt.to_period('M') <= date_max)]
-    return generate_map(df_filtrado, lst_columns),  generate_table(df_filtrado, idT='tb_amostra')
+    # print(f'date_range: {date_range}')
+    # print(f'idx_min: {idx_min} | periodo: {date_min}')
+    # print(f'idx_max: {idx_max} | periodo: {date_max}')
+    df_filtrado = df_tabela.loc[(df_tabela['dataNotificacao'] >= date_min) & (df_tabela['dataNotificacao'] <= date_max)]
+    df_mapa = df_filtrado.groupby(['NO_FANTASIA', 'NU_LATITUDE', 'NU_LONGITUDE']).agg({
+        'ocupacaoSuspeitoCli': 'mean',
+        'saidaConfirmadaObitos': 'sum'
+    }).reset_index()
+    return generate_map(df_mapa),  generate_table(df_filtrado[['dataNotificacao', 'NO_FANTASIA', 'ocupacaoSuspeitoCli', 'saidaConfirmadaObitos']], idT='tb_amostra')
 
 
 if __name__ == '__main__':
