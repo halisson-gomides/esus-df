@@ -55,7 +55,7 @@ def generate_map(dataframe, colunas=''):
     mapa = px.scatter_mapbox(dataframe[colunas], lat='NU_LATITUDE', lon='NU_LONGITUDE',
                              hover_name='NO_FANTASIA',
                              hover_data=['ocupacaoSuspeitoCli', 'saidaConfirmadaObitos'],
-                             color_continuous_scale="viridis",
+                             color_continuous_scale="reds",
                              color='saidaConfirmadaObitos',
                              size='ocupacaoSuspeitoCli',
                              height=300,
